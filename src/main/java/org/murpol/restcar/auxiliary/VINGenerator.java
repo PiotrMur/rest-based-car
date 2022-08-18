@@ -18,4 +18,5 @@ public class VINGenerator {
         }
         return newVin;
     }
+
 }

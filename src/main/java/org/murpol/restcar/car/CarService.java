@@ -1,8 +1,10 @@
 package org.murpol.restcar.car;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -27,16 +29,36 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    public void deleteCar(String vin){
+    public void deleteCar(String vin) {
+        checkVinLength(vin);
         Optional<Car> carRetrieved = carRepository.findById(vin);
-        if(carRetrieved.isEmpty()){
+        if (carRetrieved.isEmpty()) {
             throw new NoCarWithThisVinInDB(vin);
         }
         carRepository.delete(carRetrieved.get());
     }
 
-    public void updateCar(Car car){
+    @Transactional
+    public void updateCar(String vin, String brand) {
+        checkVinLength(vin);
+        Car car = carRepository.findById(vin)
+                .orElseThrow(() -> new NoCarWithThisVinInDB(vin));
+        if (brand != null && brand.length() > 0 && Objects.equals(brand, car.getBrand())) {
+            car.setBrand(brand);
+        }
+        carRepository.save(car);
+    }
 
+    public Car getCar(String vin) {
+        checkVinLength(vin);
+        return carRepository.findById(vin)
+                .orElseThrow(() -> new NoCarWithThisVinInDB(vin));
+    }
+
+    private void checkVinLength(String vin) {
+        if (vin.length() != 17) {
+            throw new InvalidVINLenghtException(vin.length());
+        }
     }
 
     private static class CarIsAlreadyInDB extends RuntimeException {
@@ -46,8 +68,14 @@ public class CarService {
     }
 
     private static class NoCarWithThisVinInDB extends RuntimeException {
-        public NoCarWithThisVinInDB(String vinID){
+        public NoCarWithThisVinInDB(String vinID) {
             super("There is no car with this VIN number [" + vinID + "] in database");
+        }
+    }
+
+    private static class InvalidVINLenghtException extends RuntimeException {
+        public InvalidVINLenghtException(Integer length) {
+            super("Invalid VIN length. It's [" + length + "] characters instead of 17");
         }
     }
 }

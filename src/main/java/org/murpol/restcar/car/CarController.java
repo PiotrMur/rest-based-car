@@ -19,6 +19,11 @@ public class CarController {
         return carService.getCars();
     }
 
+    @GetMapping(path = "{vin}")
+    public Car getCar(@PathVariable String vin){
+        return carService.getCar(vin);
+    }
+
     @PostMapping
     public void addNewCar(@RequestBody Car car){
         carService.addNewCar(car);
@@ -31,10 +36,10 @@ public class CarController {
 
     @PutMapping(path = "{vin}")
     public void updateCar(@PathVariable(name = "vin") String carVIN,
-                          @RequestParam(name = "brand", required = false) String carBrand,
+                          @RequestParam(name = "brand", required = false) String carBrand)/*,
                           @RequestParam(name = "model", required = false) String carModel,
-                          @RequestParam(name = "yop", required = false) String yearOfProduction) {
-
+                          @RequestParam(name = "yop", required = false) String yearOfProduction)*/ {
+        carService.updateCar(carVIN, carBrand);
     }
 
 }
