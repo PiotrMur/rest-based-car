@@ -21,12 +21,14 @@ public class CarService {
         return carRepository.findAll();
     }
 
-    public Car addNewCar(Car car) {
-        Optional<Car> vin = carRepository.findById(car.getVin());
+    public CarDTO addNewCar(CarDTO carDTO) {
+        Optional<Car> vin = carRepository.findById(carDTO.getVin());
         if (vin.isPresent()) {
-            throw new CarIsAlreadyInDB(car.getVin());
+            throw new CarIsAlreadyInDB(carDTO.getVin());
         }
-        return carRepository.save(car);
+        Car car = new Car(carDTO.getBrand(), carDTO.getModel(), carDTO.yearOfProduction);
+        carRepository.save(car);
+        return carDTO;
     }
 
     public void deleteCar(String vin) {
@@ -39,13 +41,16 @@ public class CarService {
     }
 
     @Transactional
-    public void updateCar(String vin, String brand) {
+    public void updateCar(String vin, CarDTO carDTO) {
         checkVinLength(vin);
         Car car = carRepository.findById(vin)
                 .orElseThrow(() -> new NoCarWithThisVinInDB(vin));
-        if (brand != null && brand.length() > 0 && Objects.equals(brand, car.getBrand())) {
+        /*if (brand != null && brand.length() > 0 && Objects.equals(brand, car.getBrand())) {
             car.setBrand(brand);
-        }
+        }*/
+        car.setBrand(car.getBrand());
+        car.setModel(car.getModel());
+        car.setYearOfProduction(car.getYearOfProduction());
         carRepository.save(car);
     }
 

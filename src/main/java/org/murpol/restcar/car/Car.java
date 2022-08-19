@@ -37,8 +37,16 @@ public class Car {
         return model;
     }
 
+    public void setModel(String model) {
+        this.model = model;
+    }
+
     public String getYearOfProduction() {
         return yearOfProduction;
+    }
+
+    public void setYearOfProduction(String yearOfProduction) {
+        this.yearOfProduction = yearOfProduction;
     }
 
     public String getVin() {

@@ -25,7 +25,7 @@ public class CarController {
     }
 
     @PostMapping
-    public void addNewCar(@RequestBody Car car){
+    public void addNewCar(@RequestBody CarDTO car){
         carService.addNewCar(car);
     }
 
@@ -36,10 +36,10 @@ public class CarController {
 
     @PutMapping(path = "{vin}")
     public void updateCar(@PathVariable(name = "vin") String carVIN,
-                          @RequestParam(name = "brand", required = false) String carBrand)/*,
+                          @RequestBody CarDTO carDTO)/*,
                           @RequestParam(name = "model", required = false) String carModel,
                           @RequestParam(name = "yop", required = false) String yearOfProduction)*/ {
-        carService.updateCar(carVIN, carBrand);
+        carService.updateCar(carVIN, carDTO);
     }
 
 }
