@@ -25,8 +25,8 @@ public class CarController {
     }
 
     @PostMapping
-    public void addNewCar(@RequestBody CarDTO car){
-        carService.addNewCar(car);
+    public void addNewCar(@RequestBody CarDTO carDTO){
+        carService.addNewCar(carDTO);
     }
 
     @DeleteMapping(path = "{vin}")

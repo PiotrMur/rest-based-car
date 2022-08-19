@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -22,11 +21,11 @@ public class CarService {
     }
 
     public CarDTO addNewCar(CarDTO carDTO) {
-        Optional<Car> vin = carRepository.findById(carDTO.getVin());
+        Optional<Car> vin = carRepository.findById(carDTO.vin());
         if (vin.isPresent()) {
-            throw new CarIsAlreadyInDB(carDTO.getVin());
+            throw new CarIsAlreadyInDB(carDTO.vin());
         }
-        Car car = new Car(carDTO.getBrand(), carDTO.getModel(), carDTO.yearOfProduction);
+        Car car = new Car(carDTO.brand(), carDTO.model(), carDTO.yearOfProduction());
         carRepository.save(car);
         return carDTO;
     }
@@ -35,7 +34,7 @@ public class CarService {
         checkVinLength(vin);
         Optional<Car> carRetrieved = carRepository.findById(vin);
         if (carRetrieved.isEmpty()) {
-            throw new NoCarWithThisVinInDB(vin);
+            throw new NoCarWithThisVinInDbException(vin);
         }
         carRepository.delete(carRetrieved.get());
     }
@@ -44,7 +43,7 @@ public class CarService {
     public void updateCar(String vin, CarDTO carDTO) {
         checkVinLength(vin);
         Car car = carRepository.findById(vin)
-                .orElseThrow(() -> new NoCarWithThisVinInDB(vin));
+                .orElseThrow(() -> new NoCarWithThisVinInDbException(vin));
         /*if (brand != null && brand.length() > 0 && Objects.equals(brand, car.getBrand())) {
             car.setBrand(brand);
         }*/
@@ -57,7 +56,7 @@ public class CarService {
     public Car getCar(String vin) {
         checkVinLength(vin);
         return carRepository.findById(vin)
-                .orElseThrow(() -> new NoCarWithThisVinInDB(vin));
+                .orElseThrow(() -> new NoCarWithThisVinInDbException(vin));
     }
 
     private void checkVinLength(String vin) {
@@ -72,8 +71,8 @@ public class CarService {
         }
     }
 
-    private static class NoCarWithThisVinInDB extends RuntimeException {
-        public NoCarWithThisVinInDB(String vinID) {
+    private static class NoCarWithThisVinInDbException extends RuntimeException {
+        public NoCarWithThisVinInDbException(String vinID) {
             super("There is no car with this VIN number [" + vinID + "] in database");
         }
     }
