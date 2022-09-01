@@ -1,5 +1,7 @@
 package org.murpol.restcar.car;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,16 +17,17 @@ public class CarController {
     }
 
     @GetMapping
-    public List<Car> getCars(){
-        return carService.getCars();
+    public ResponseEntity<List<Car>> getCars(){
+        return new ResponseEntity<>(carService.getCars(), HttpStatus.OK);
     }
 
     @GetMapping(path = "{vin}")
-    public Car getCar(@PathVariable String vin){
-        return carService.getCar(vin);
+    public ResponseEntity<Car> getCar(@PathVariable String vin){
+        return new ResponseEntity<>(carService.getCar(vin), HttpStatus.OK);
     }
 
     @PostMapping
+    @ResponseStatus(value = HttpStatus.CREATED)
     public void addNewCar(@RequestBody CarDTO carDTO){
         carService.addNewCar(carDTO);
     }

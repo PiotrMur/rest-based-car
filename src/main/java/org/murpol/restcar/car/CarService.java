@@ -47,9 +47,9 @@ public class CarService {
         /*if (brand != null && brand.length() > 0 && Objects.equals(brand, car.getBrand())) {
             car.setBrand(brand);
         }*/
-        car.setBrand(car.getBrand());
-        car.setModel(car.getModel());
-        car.setYearOfProduction(car.getYearOfProduction());
+        car.setBrand(carDTO.brand());
+        car.setModel(carDTO.model());
+        car.setYearOfProduction(carDTO.yearOfProduction());
         carRepository.save(car);
     }
 
@@ -61,7 +61,7 @@ public class CarService {
 
     private void checkVinLength(String vin) {
         if (vin.length() != 17) {
-            throw new InvalidVINLenghtException(vin.length());
+            throw new InvalidVINLengthException(vin.length());
         }
     }
 
@@ -77,8 +77,8 @@ public class CarService {
         }
     }
 
-    private static class InvalidVINLenghtException extends RuntimeException {
-        public InvalidVINLenghtException(Integer length) {
+    private static class InvalidVINLengthException extends RuntimeException {
+        public InvalidVINLengthException(Integer length) {
             super("Invalid VIN length. It's [" + length + "] characters instead of 17");
         }
     }
