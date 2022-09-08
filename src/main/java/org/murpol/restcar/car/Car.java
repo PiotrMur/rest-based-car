@@ -53,6 +53,10 @@ public class Car {
         return vin;
     }
 
+    public void setVin(String vin) {
+        this.vin = vin;
+    }
+
     @Override
     public String toString() {
         return "Car{" +

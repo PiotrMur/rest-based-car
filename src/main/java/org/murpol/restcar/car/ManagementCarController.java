@@ -1,38 +1,34 @@
 package org.murpol.restcar.car;
 
+
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/cars")
-public class CarController {
+@RequestMapping(path = "management/api/v1/cars")
+public class ManagementCarController {
 
-    private CarService carService;
+    private final CarService carService;
 
-    public CarController(CarService carService) {
+    public ManagementCarController(CarService carService) {
         this.carService = carService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Car>> getCars(){
-        return new ResponseEntity<>(carService.getCars(), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "{vin}")
-    public ResponseEntity<Car> getCar(@PathVariable String vin){
-        return new ResponseEntity<>(carService.getCar(vin), HttpStatus.OK);
+    public List<Car> getCars(){
+       return carService.getCars();
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void addNewCar(@RequestBody CarDTO carDTO){
-        carService.addNewCar(carDTO);
+    public void createCar(@RequestBody CarDTO carDTO){
+        carService.validateInput(carDTO);
     }
 
     @DeleteMapping(path = "{vin}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteCar(@PathVariable(name = "vin") String carVIN){
         carService.deleteCar(carVIN);
     }
@@ -44,5 +40,4 @@ public class CarController {
                           @RequestParam(name = "yop", required = false) String yearOfProduction)*/ {
         carService.updateCar(carVIN, carDTO);
     }
-
 }
