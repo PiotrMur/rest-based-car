@@ -2,12 +2,8 @@ package org.murpol.restcar.car;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
@@ -16,11 +12,9 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class CarServiceTest {
 
-    @Mock
-    private CarRepository carRepository;
+    private CarRepository carRepository = new InMemoryCarRepository();
     // @InjectMocks
     private CarService carService;
 
@@ -31,11 +25,23 @@ class CarServiceTest {
     }
 
     @Test
-    void getCars() {
+    void getEmptyCars() {
         //when
-        carService.getCars();
+        var cars = carService.getCars();
         //then
-        verify(carRepository).findAll();
+        assertThat(cars).isEmpty();
+    }
+
+    @Test
+    void getCars() {
+        //given
+        Car car = new Car();
+        carRepository.store(car);
+
+        //when
+        var cars = carService.getCars();
+        //then
+        assertThat(cars).hasSize(1);
     }
 
 /*    @Test
@@ -57,13 +63,20 @@ class CarServiceTest {
         //given
         Car car = new Car("Ferrari", "LaFerrari", "2019");
         String vin = car.getVin();
-        //given(carRepository.findById(vin)).willReturn(Optional.of(car)); //sprawdz tez metode when, given to BDD. To jest STUB
-        when(carRepository.findById(vin)).thenReturn(Optional.of(car)); //wykonuje metode findby zeby zmokowac dane
-        //doReturn(Optional.of(car)).when(carRepository).findById(vin); //NIe wykonuje metody findby zeby zmokowac dane
+        carRepository.store(car);
+
+        var beforeCount = carRepository.findAll().size();
+
         //when
         carService.deleteCar(vin);
-        //verify(carRepository, times(1)).delete(car);
-        then(carRepository).should().delete(car); //MockitoBDD
+
+        //then
+        var afterCount = carRepository.findAll().size();
+
+        assertThat(beforeCount).isEqualTo( afterCount + 1);
+
+        var result = carRepository.findByVin(vin);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -83,11 +96,14 @@ class CarServiceTest {
         Car car = new Car("Ferrari", "LaFerrari", "2019");
         String vin = car.getVin();
         CarDTO carDTO = new CarDTO(vin, "Ferrari", "F450", "2009");
-        when(carRepository.findById(vin)).thenReturn(Optional.of(car));
+
+        carRepository.store(car);
+
         //when
         carService.updateCar(vin, carDTO);
         //then
-        verify(carRepository).save(car);
+        var expectedCar = carRepository.findByVin(vin);
+        assertThat(expectedCar).get().extracting(Car::getModel).isEqualTo("F450");
     }
 
     @Test
@@ -96,12 +112,14 @@ class CarServiceTest {
         Car car = new Car("Ferrari", "LaFerrari", "2019");
         String vin = car.getVin();
 
+        carRepository.store(car);
         //when
-        when(carRepository.findById(vin)).thenReturn(Optional.of(car));
+
         carService.getCar(vin);
 
         //then
-        verify(carRepository).findById(vin);
+        var expectedCar = carRepository.findByVin(vin);
+        assertThat(expectedCar).hasValue(car);
     }
 
     @Test
@@ -117,20 +135,20 @@ class CarServiceTest {
         //given
         String vin = "N9EG5HTCJHSV01HE7";
         //then
-        assertThatCode(() -> carService.checkVinLength(vin)).doesNotThrowAnyException();
+        assertThatCode(() -> carService.checkVin(vin)).doesNotThrowAnyException();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"N9EG5HTCJHSV01HE7", "00000000000000000"})
     void checkVinLength(String vin) {
-        assertThatCode(() -> carService.checkVinLength(vin)).doesNotThrowAnyException();
+        assertThatCode(() -> carService.checkVin(vin)).doesNotThrowAnyException();
     }
 
 
     @ParameterizedTest
     @ValueSource(strings = {"N9EG5HTCJHSV0", "N9EG5HTCJHSV0JDLAINCOA", ""})
     void checkIfInappropriateVinLengthThrowsException(String vin) {
-        assertThatThrownBy(() -> carService.checkVinLength(vin))
+        assertThatThrownBy(() -> carService.checkVin(vin))
                 .isInstanceOf(CarService.InvalidVINLengthException.class)
                 .hasMessageContaining("Invalid VIN length. There are");
     }
