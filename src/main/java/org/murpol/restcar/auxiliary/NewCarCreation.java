@@ -5,15 +5,21 @@ import org.murpol.restcar.car.CarDTO;
 import org.murpol.restcar.car.CarRepository;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NewCarCreation {
+
     private final CarRepository carRepository;
 
-    public NewCarCreation(CarRepository carRepository) {
-        this.carRepository = carRepository;
+    public NewCarCreation(CarRepository carCrudRepository) {
+        this.carRepository = carCrudRepository;
     }
 
     public void validateInput(CarDTO carDTO) {
+
+
+
         if (carDTO.vin() == null || carDTO.vin().isEmpty()) {
             createVinAndAddNewCar(carDTO);
         } else {
@@ -25,12 +31,12 @@ public class NewCarCreation {
 
         Car car = new Car(carDTO.brand(), carDTO.model(), carDTO.yearOfProduction());
 
-        Optional<Car> newCarsId = carRepository.findById(carDTO.vin());
+        Optional<Car> newCarsId = carRepository.findByVin(carDTO.vin());
         if (newCarsId.isPresent()) {
             throw new CarIsAlreadyInDB(car.getVin());
         }
 
-        carRepository.save(car);
+        carRepository.store(car);
         return car;
     }
 
@@ -38,12 +44,12 @@ public class NewCarCreation {
         Car car = new Car(carDTO.brand(), carDTO.model(), carDTO.yearOfProduction());
         car.setVin(carDTO.vin());
 
-        Optional<Car> carsId = carRepository.findById(car.getVin());
+        Optional<Car> carsId = carRepository.findByVin(car.getVin());
         if (carsId.isPresent()) {
             throw new CarIsAlreadyInDB(car.getVin());
         }
 
-        carRepository.save(car);
+        carRepository.store(car);
         return car;
     }
 
