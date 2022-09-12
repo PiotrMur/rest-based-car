@@ -6,40 +6,42 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class CarService {
 
-    private final CarRepository carRepository;
 
-    public CarService(CarRepository carRepository) {
-        this.carRepository = carRepository;
+    private final CarRepositoryImplementationXX carRepositoryImplementationXX;
+
+    public CarService(CarRepositoryImplementationXX carRepositoryImplementationXX) {
+        this.carRepositoryImplementationXX = carRepositoryImplementationXX;
     }
 
 
     public List<Car> getCars() {
-        return StreamSupport.stream(carRepository.findAll().spliterator(), false).toList();
+        return carRepositoryImplementationXX.getAllCars();
     }
 
     public void validateInput(CarDTO carDTO) {
-        NewCarCreation.validateInput(carDTO);
+        new NewCarCreation(carRepositoryImplementationXX).validateInput(carDTO);
     }
 
 
     public void deleteCar(String vin) {
         checkVinLength(vin);
-        Optional<Car> carRetrieved = carRepository.findById(vin);
+        Optional<Car> carRetrieved = carRepositoryImplementationXX.findCarByVIN(vin);
         if (carRetrieved.isEmpty()) {
             throw new NoCarWithThisVinInDbException(vin);
         }
-        carRepository.delete(carRetrieved.get());
+        carRepositoryImplementationXX.deleteCar(carRetrieved.get());
     }
 
     @Transactional
     public void updateCar(String vin, CarDTO carDTO) {
         checkVinLength(vin);
-        Car car = carRepository.findById(vin)
+        Car car = carRepositoryImplementationXX.findCarByVIN(vin)
                 .orElseThrow(() -> new NoCarWithThisVinInDbException(vin));
         /*if (brand != null && brand.length() > 0 && Objects.equals(brand, car.getBrand())) {
             car.setBrand(brand);
@@ -47,17 +49,20 @@ public class CarService {
         car.setBrand(carDTO.brand());
         car.setModel(carDTO.model());
         car.setYearOfProduction(carDTO.yearOfProduction());
-        carRepository.save(car);
+        carRepositoryImplementationXX.storeCar(car);
     }
 
     public Car getCar(String vin) {
         checkVinLength(vin);
-        return carRepository.findById(vin)
+        return carRepositoryImplementationXX.findCarByVIN(vin)
                 .orElseThrow(() -> new NoCarWithThisVinInDbException(vin));
     }
 
+    private static final Pattern VIN_PATTERN = Pattern.compile("[A-Z0-9]+");
+
     public void checkVinLength(String vin) {
-        if (vin.length() != 17) {
+        Matcher matcher = VIN_PATTERN.matcher(vin);
+        if (vin.length() != 17 && matcher.find()) {
             throw new InvalidVINLengthException(vin.length());
         }
     }

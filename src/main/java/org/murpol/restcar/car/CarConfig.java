@@ -10,7 +10,7 @@ import java.util.List;
 public class CarConfig {
 
     @Bean
-    CommandLineRunner commandLineRunner(CarRepository repository){
+    CommandLineRunner commandLineRunner(CarCrudRepository repository){
         return args -> {
             Car x5 = new Car("BMW", "X5", "2021");
             Car i5 = new Car("BMW", "i5", "2022");

@@ -2,15 +2,19 @@ package org.murpol.restcar.auxiliary;
 
 import org.murpol.restcar.car.Car;
 import org.murpol.restcar.car.CarDTO;
-import org.murpol.restcar.car.CarRepository;
+import org.murpol.restcar.car.CarRepositoryImplementationXX;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-public class NewCarCreation {
-    private final CarRepository carRepository;
 
-    public NewCarCreation(CarRepository carRepository) {
-        this.carRepository = carRepository;
+public class NewCarCreation {
+
+
+    private final CarRepositoryImplementationXX carRepositoryImplementationXX;
+
+    public NewCarCreation(CarRepositoryImplementationXX carRepositoryImplementationXX) {
+        this.carRepositoryImplementationXX = carRepositoryImplementationXX;
     }
 
     public void validateInput(CarDTO carDTO) {
@@ -25,12 +29,12 @@ public class NewCarCreation {
 
         Car car = new Car(carDTO.brand(), carDTO.model(), carDTO.yearOfProduction());
 
-        Optional<Car> newCarsId = carRepository.findById(carDTO.vin());
+        Optional<Car> newCarsId = carRepositoryImplementationXX.findCarByVIN(carDTO.vin());
         if (newCarsId.isPresent()) {
             throw new CarIsAlreadyInDB(car.getVin());
         }
 
-        carRepository.save(car);
+        carRepositoryImplementationXX.storeCar(car);
         return car;
     }
 
@@ -38,12 +42,12 @@ public class NewCarCreation {
         Car car = new Car(carDTO.brand(), carDTO.model(), carDTO.yearOfProduction());
         car.setVin(carDTO.vin());
 
-        Optional<Car> carsId = carRepository.findById(car.getVin());
+        Optional<Car> carsId = carRepositoryImplementationXX.findCarByVIN(car.getVin());
         if (carsId.isPresent()) {
             throw new CarIsAlreadyInDB(car.getVin());
         }
 
-        carRepository.save(car);
+        carRepositoryImplementationXX.storeCar(car);
         return car;
     }
 

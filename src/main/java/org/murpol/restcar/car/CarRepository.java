@@ -1,6 +1,13 @@
 package org.murpol.restcar.car;
 
-import org.springframework.data.repository.CrudRepository;
+import java.util.List;
+import java.util.Optional;
 
-public interface CarRepository extends CrudRepository<Car, String> { //zmien na CRUD bo działa szybciej
+public interface CarRepository {
+
+    public List<Car> getAllCars();
+    public Optional<Car> findCarByVIN(String vin);
+
+    public void deleteCar(Car car);
+    public void storeCar(Car car);
 }
